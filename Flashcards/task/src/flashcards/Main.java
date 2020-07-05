@@ -13,9 +13,15 @@ public class Main {
     static Map<String, String> flashcards = new LinkedHashMap<>();
     static Map<String, Integer> mistakes = new LinkedHashMap<>();
     static LinkedList<String> logger = new LinkedList<>();
+    static String importFile = "";
+    static String exportFile = "";
 
     public static void main(String[] args) {
         flashcards.clear();
+        argsParse(args);
+        if (!importFile.isBlank()){
+            importFromFile(importFile);
+        }
         do {
             menu();
             String action = scanner.nextLine();
@@ -53,6 +59,19 @@ public class Main {
             }
         } while (!exit);
 
+    }
+
+    private static void argsParse(String[] args) {
+        for (int i = 0; i < args.length; i++){
+            switch (args[i]){
+                case "-import":
+                    importFile = args[i + 1];
+                    break;
+                case "-export":
+                    exportFile = args[i + 1];
+                    break;
+            }
+        }
     }
 
     private static void addCard() {
@@ -131,12 +150,53 @@ public class Main {
         }
     }
 
+    private static void importFromFile(String importFile){
+        File file = new File(importFile);
+        int updateCount = 0;
+        try (Scanner fileScanner = new Scanner(file)) {
+            while (fileScanner.hasNext()) {
+                String[] line;
+                line = fileScanner.nextLine().split(":");
+                var term = line[0];
+                var definition = line[1];
+                var mistakeCount = Integer.parseInt(line[2]);
+                flashcards.put(term, definition);
+                mistakes.put(term, mistakeCount);
+                updateCount++;
+            }
+            String output = String.format("%d cards have been loaded.\n", updateCount);
+            System.out.print(output);
+            logger.add(output);
+        } catch (FileNotFoundException e) {
+            String output = "File not found.";
+            System.out.println(output);
+            logger.add(output);
+        }
+    }
+
     private static void exportToFile() {
         System.out.println("File name:");
         logger.add("File name:");
         String outfile = scanner.nextLine();
         logger.add(outfile);
         File file = new File(outfile);
+        try (PrintWriter printWriter = new PrintWriter(file)) {
+            for (var entry : flashcards.entrySet()){
+                int mistakeCount = mistakes.get(entry.getKey());
+                String line = entry.getKey() + ":" + entry.getValue() + ":" + mistakeCount;
+                printWriter.println(line);
+            }
+        } catch (IOException e) {
+            String error = String.format("An exception occurs %s", e.getMessage());
+            System.out.print(error);
+            logger.add(error);
+        }
+        String output = String.format("%d cards have been saved.\n", flashcards.size());
+        System.out.print(output);
+    }
+
+    private static void exportToFile(String exportFile){
+        File file = new File(exportFile);
         try (PrintWriter printWriter = new PrintWriter(file)) {
             for (var entry : flashcards.entrySet()){
                 int mistakeCount = mistakes.get(entry.getKey());
@@ -248,6 +308,9 @@ public class Main {
 
     public static void exit() {
         System.out.println("Bye!");
+        if(!exportFile.isBlank()){
+            exportToFile(exportFile);
+        }
         exit = true;
     }
 
