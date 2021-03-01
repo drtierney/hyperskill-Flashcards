@@ -2,7 +2,7 @@
 Developing an application which allows flashcards to be created and used for remembering definitions of terms.  
 https://hyperskill.org/projects/44
 
-<img src="https://github.com/drtierney/hyperskill-Flashcards/blob/master/Flashcards.gif" width="800" height="500" />
+<img src="https://github.com/drtierney/hyperskill-Flashcards/blob/main/Flashcards.gif" width="800" height="500" />
 
 ## Syntax
 
